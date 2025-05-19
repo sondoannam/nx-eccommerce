@@ -2,13 +2,19 @@
   "name": "@multi-vendor-saas/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "dev": "pnpx nx run-many --target=serve --all"
+  },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^10.0.2",
     "@nestjs/core": "^10.0.2",
     "@nestjs/platform-express": "^10.0.2",
+    "@nestjs/throttler": "^6.4.0",
     "axios": "^1.6.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.5.0",
+    "http-proxy-middleware": "^3.0.5",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0"
   },
@@ -28,6 +34,8 @@
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/express": "^5.0.2",
     "@types/jest": "^29.5.12",
     "@types/node": "~18.16.9",
     "eslint": "^9.8.0",
