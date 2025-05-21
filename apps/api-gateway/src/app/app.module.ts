@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -6,6 +6,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerBehindProxyGuard } from './guards/throttler.guard';
 import { ProxyModule } from './proxy/proxy.module';
 import { HealthModule } from './health/health.module';
+import { ErrorLoggerMiddleware } from 'packages/error-handler';
 
 @Module({
   imports: [
@@ -27,4 +28,8 @@ import { HealthModule } from './health/health.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ErrorLoggerMiddleware).forRoutes('*');
+  }
+}
