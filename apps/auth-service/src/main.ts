@@ -2,11 +2,15 @@
  * Auth service for multi-vendor SaaS platform
  */
 
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import cookieParser from 'cookie-parser';
 import { AllExceptionsFilter } from 'packages/error-handler';
+import {
+  setupSwagger,
+  createServiceSwaggerOptions,
+} from 'packages/swagger-config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -24,9 +28,21 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Set up global validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    })
+  );
+
   app.use(cookieParser());
 
   app.useGlobalFilters(new AllExceptionsFilter());
+
+  // Set up Swagger documentation using shared configuration
+  setupSwagger(app, createServiceSwaggerOptions('Auth Service'));
 
   const port = process.env.PORT || 8001;
 
