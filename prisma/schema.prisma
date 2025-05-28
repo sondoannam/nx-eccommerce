@@ -31,15 +31,51 @@ enum Role {
 }
 
 model User {
-    id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    name      String
-    email     String   @unique
-    password  String?
-    phone     String?  @unique
-    country   String?
-    avatar    Image?
-    following String[] @db.ObjectId
-    role      Role     @default(USER)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id               String            @id @default(auto()) @map("_id") @db.ObjectId
+    name             String
+    email            String            @unique
+    password         String?
+    phone            String?           @unique
+    country          String?
+    avatar           Image?
+    following        String[]          @db.ObjectId
+    role             Role              @default(USER)
+    isEmailVerified  Boolean           @default(false)
+    isPhoneVerified  Boolean           @default(false)
+    otpVerifications OtpVerification[]
+    createdAt        DateTime          @default(now())
+    updatedAt        DateTime          @updatedAt
+}
+
+enum OtpType {
+    EMAIL_VERIFICATION
+    PHONE_VERIFICATION
+    PASSWORD_RESET
+    TWO_FACTOR_AUTH
+}
+
+enum OtpStatus {
+    PENDING
+    VERIFIED
+    EXPIRED
+    FAILED
+}
+
+model OtpVerification {
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
+    userId      String    @db.ObjectId
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    otpCode     String
+    otpType     OtpType
+    status      OtpStatus @default(PENDING)
+    expiresAt   DateTime
+    verifiedAt  DateTime?
+    attempts    Int       @default(0)
+    maxAttempts Int       @default(3)
+    metadata    Json? // For additional data like email, phone, etc.
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([userId, otpType])
+    @@index([otpCode, expiresAt])
 }

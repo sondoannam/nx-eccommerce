@@ -28,4 +28,8 @@ export interface OTPTemplate {
   description: string;
   code: string;
   note: string;
+  securityNote?: string;
+  recipientName?: string;
+  expiresInMinutes?: number;
+  currentYear?: number;
 }
