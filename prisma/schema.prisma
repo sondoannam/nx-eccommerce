@@ -1,12 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
     provider = "prisma-client-js"
-    output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,37 +10,10 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Image {
-    id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    file_id   String   @unique
-    url       String
-    userId    String?  @unique @db.ObjectId
-    user      User?    @relation(fields: [userId], references: [id])
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
-enum Role {
+enum UserRole {
     USER
     SELLER
     ADMIN
-}
-
-model User {
-    id               String            @id @default(auto()) @map("_id") @db.ObjectId
-    name             String
-    email            String            @unique
-    password         String?
-    phone            String?           @unique
-    country          String?
-    avatar           Image?
-    following        String[]          @db.ObjectId
-    role             Role              @default(USER)
-    isEmailVerified  Boolean           @default(false)
-    isPhoneVerified  Boolean           @default(false)
-    otpVerifications OtpVerification[]
-    createdAt        DateTime          @default(now())
-    updatedAt        DateTime          @updatedAt
 }
 
 enum OtpType {
@@ -61,10 +30,29 @@ enum OtpStatus {
     FAILED
 }
 
+model User {
+    id              String   @id @default(auto()) @map("_id") @db.ObjectId
+    name            String
+    email           String   @unique
+    password        String
+    phone           String?  @unique
+    country         String?
+    avatar          String?  @db.ObjectId
+    following       String[] @db.ObjectId
+    role            UserRole @default(USER)
+    isEmailVerified Boolean  @default(false)
+    isPhoneVerified Boolean  @default(false)
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    otpVerifications OtpVerification[]
+
+    @@map("users")
+}
+
 model OtpVerification {
     id          String    @id @default(auto()) @map("_id") @db.ObjectId
     userId      String    @db.ObjectId
-    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
     otpCode     String
     otpType     OtpType
     status      OtpStatus @default(PENDING)
@@ -72,10 +60,13 @@ model OtpVerification {
     verifiedAt  DateTime?
     attempts    Int       @default(0)
     maxAttempts Int       @default(3)
-    metadata    Json? // For additional data like email, phone, etc.
+    metadata    Json?
     createdAt   DateTime  @default(now())
     updatedAt   DateTime  @updatedAt
 
+    user User @relation(fields: [userId], references: [id])
+
     @@index([userId, otpType])
     @@index([otpCode, expiresAt])
+    @@map("otp_verifications")
 }

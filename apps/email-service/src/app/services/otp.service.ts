@@ -11,12 +11,10 @@ import {
   OtpResponseDto,
   OtpType,
   Language,
-  VerifyOtpDto,
 } from '../dtos';
 import { PrismaService } from 'packages/libs/prisma';
 import { OtpVerificationService } from './otp-verification.service';
 import {
-  CreateOtpVerificationDto,
   VerifyOtpVerificationDto,
   VerifyOtpResultDto,
 } from '../dtos';
@@ -25,7 +23,6 @@ import {
 export class OtpService {
   private readonly logger = new Logger(OtpService.name);
   private readonly OTP_EXPIRY_MINUTES = 5;
-
   constructor(
     @InjectQueue(QUEUE_NAMES.EMAIL_OTP) private readonly otpQueue: Queue,
     private readonly prisma: PrismaService,
@@ -61,13 +58,13 @@ export class OtpService {
   private getJobType(otpType: OtpType): string {
     switch (otpType) {
       case OtpType.EMAIL_VERIFICATION:
-        return JOB_TYPES.EMAIL_OTP.SEND_VERIFICATION_OTP;
+        return JOB_TYPES.EMAIL_OTP.SEND_OTP;
       case OtpType.PASSWORD_RESET:
-        return JOB_TYPES.EMAIL_OTP.SEND_PASSWORD_RESET_OTP;
+        return JOB_TYPES.EMAIL_OTP.SEND_PASSWORD_RESET;
       case OtpType.TWO_FACTOR_AUTH:
-        return JOB_TYPES.EMAIL_OTP.SEND_TWO_FACTOR_OTP;
+        return JOB_TYPES.EMAIL_OTP.SEND_TWO_FACTOR;
       default:
-        return JOB_TYPES.EMAIL_OTP.SEND_VERIFICATION_OTP;
+        return JOB_TYPES.EMAIL_OTP.SEND_OTP;
     }
   }
 

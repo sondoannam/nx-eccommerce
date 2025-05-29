@@ -1,12 +1,17 @@
 import { Module, DynamicModule } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { bullMQRedisConfig, defaultQueueOptions } from './index';
+import { ConfigModule } from '@nestjs/config';
+import { BullmqConfigService } from './bullmq.config';
 
 /**
  * Shared BullMQ module that can be imported by microservices
  * This provides a consistent configuration across all services
  */
-@Module({})
+@Module({
+  imports: [ConfigModule],
+  providers: [BullmqConfigService],
+  exports: [BullmqConfigService],
+})
 export class SharedBullMQModule {
   /**
    * Import specific queues for a microservice
@@ -14,26 +19,28 @@ export class SharedBullMQModule {
    * @returns DynamicModule configured with the specified queues
    */
   static forQueues(queueNames: string[]): DynamicModule {
-    // Create queue configurations
-    const imports = [
-      BullModule.forRoot({
-        connection: bullMQRedisConfig,
-      }),
-    ];
-
-    // Register each queue individually to avoid spread operator issues
-    queueNames.forEach((name) => {
-      imports.push(
-        BullModule.registerQueue({
-          name,
-          ...defaultQueueOptions,
-        })
-      );
-    });
-
     return {
       module: SharedBullMQModule,
-      imports,
+      imports: [
+        BullModule.forRootAsync({
+          imports: [ConfigModule],
+          inject: [BullmqConfigService],
+          useFactory: (configService: BullmqConfigService) => ({
+            connection: configService.getRedisConfig(),
+          }),
+        }),
+        ...queueNames.map(name => 
+          BullModule.registerQueueAsync({
+            imports: [ConfigModule],
+            name,
+            inject: [BullmqConfigService],
+            useFactory: (configService: BullmqConfigService) => ({
+              connection: configService.getRedisConfig(),
+              ...configService.getDefaultQueueOptions(),
+            }),
+          })
+        ),
+      ],
       exports: [BullModule],
     };
   }
@@ -45,8 +52,12 @@ export class SharedBullMQModule {
     return {
       module: SharedBullMQModule,
       imports: [
-        BullModule.forRoot({
-          connection: bullMQRedisConfig,
+        BullModule.forRootAsync({
+          imports: [ConfigModule],
+          inject: [BullmqConfigService],
+          useFactory: (configService: BullmqConfigService) => ({
+            connection: configService.getRedisConfig(),
+          }),
         }),
       ],
       exports: [BullModule],

@@ -10,7 +10,7 @@ import {
   IsPositive,
   IsString,
 } from 'class-validator';
-import { OtpType } from 'generated/prisma';
+import { OtpType } from '@prisma/client';
 import { Type } from 'class-transformer';
 
 /**

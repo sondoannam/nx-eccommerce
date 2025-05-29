@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SharedBullMQModule, QUEUE_NAMES } from 'packages/libs/bullmq-config';
@@ -11,6 +12,9 @@ import { OtpVerificationService } from './services/otp-verification.service';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     PrismaModule,
     SharedBullMQModule.forQueues([
       QUEUE_NAMES.EMAIL_OTP,

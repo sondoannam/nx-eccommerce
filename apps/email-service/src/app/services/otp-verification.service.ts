@@ -1,12 +1,5 @@
 /**
- * OTPimport { OtpStatus, OtpType } from 'generated/prisma';
-import { 
-  CreateOtpVerificationDto, 
-  OtpVerificationResponseDto, 
-  VerifyOtpVerificationDto, 
-  VerifyOtpResultDto,
-  CleanupOtpResponseDto
-} from '../dtos';ation service for managing OTP operations with database
+ * OTP verification service for managing OTP operations with database
  */
 import {
   Injectable,
@@ -15,8 +8,8 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
+import { OtpStatus, OtpType } from '@prisma/client';
 import { PrismaService } from 'packages/libs/prisma';
-import { OtpStatus, OtpType } from 'generated/prisma';
 import {
   CreateOtpVerificationDto,
   OtpVerificationResponseDto,
@@ -30,7 +23,6 @@ export class OtpVerificationService {
   private readonly logger = new Logger(OtpVerificationService.name);
   private readonly defaultExpiryMinutes = 5;
   private readonly maxAttempts = 3;
-
   constructor(private readonly prisma: PrismaService) {}
   /**
    * Create a new OTP verification record in the database

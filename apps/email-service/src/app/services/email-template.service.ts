@@ -18,7 +18,8 @@ export class EmailTemplateService {
 
   /**
    * Get compiled Handlebars template (with caching)
-   */ private getCompiledTemplate(
+   */
+  private getCompiledTemplate(
     templateName: string
   ): HandlebarsTemplateDelegate {
     if (this.templateCache.has(templateName)) {

@@ -9,7 +9,7 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
-import { Role } from 'generated/prisma';
+import { UserRole } from 'packages/libs/utils';
 
 /**
  * Data Transfer Object for user registration
@@ -51,14 +51,13 @@ export class CreateUserDto {
       'Password requires at least one uppercase letter, one lowercase letter, and one number',
   })
   password: string;
-
   @ApiProperty({
     description: 'The role of the user',
-    enum: Role,
-    default: Role.USER,
+    enum: UserRole,
+    default: UserRole.USER,
     required: false,
   })
-  @IsEnum(Role, { message: 'Invalid role' })
+  @IsEnum(UserRole, { message: 'Invalid role' })
   @IsOptional()
-  role?: Role = Role.USER;
+  role?: UserRole = UserRole.USER;
 }

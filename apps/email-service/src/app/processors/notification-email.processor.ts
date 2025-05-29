@@ -1,5 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
 import { QUEUE_NAMES, JOB_TYPES } from 'packages/libs/bullmq-config';
 import * as nodemailer from 'nodemailer';
@@ -19,7 +20,7 @@ export class NotificationEmailProcessor extends WorkerHost {
   private readonly logger = new Logger(NotificationEmailProcessor.name);
   private transporter: nodemailer.Transporter;
 
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     super();
     this.initializeTransporter();
   }
@@ -29,12 +30,12 @@ export class NotificationEmailProcessor extends WorkerHost {
    */
   private initializeTransporter() {
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'localhost',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true',
+      host: this.configService.get<string>('SMTP_HOST', 'localhost'),
+      port: this.configService.get<number>('SMTP_PORT', 587),
+      secure: this.configService.get<string>('SMTP_SECURE') === 'true',
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
+        user: this.configService.get<string>('SMTP_USER'),
+        pass: this.configService.get<string>('SMTP_PASSWORD'),
       },
       pool: true,
       maxConnections: 5,
@@ -51,13 +52,13 @@ export class NotificationEmailProcessor extends WorkerHost {
 
     try {
       switch (job.name) {
-        case JOB_TYPES.EMAIL_NOTIFICATION.SEND_WELCOME:
+        case JOB_TYPES.EMAIL_NOTIFICATION.WELCOME:
           return await this.sendWelcomeEmail(job.data);
 
-        case JOB_TYPES.EMAIL_NOTIFICATION.SEND_MARKETING:
-          return await this.sendMarketingEmail(job.data);
+        // case JOB_TYPES.EMAIL_NOTIFICATION.SEND_MARKETING:
+        //   return await this.sendMarketingEmail(job.data);
 
-        case JOB_TYPES.EMAIL_NOTIFICATION.SEND_PAYMENT_RECEIPT:
+        case JOB_TYPES.EMAIL_NOTIFICATION.ORDER_CONFIRMATION:
           return await this.sendPaymentReceiptEmail(job.data);
 
         default:
@@ -166,9 +167,13 @@ export class NotificationEmailProcessor extends WorkerHost {
   }): Promise<void> {
     try {
       const mailOptions = {
-        from: `"${process.env.SMTP_FROM_NAME || 'Multi-Vendor SaaS'}" <${
-          process.env.SMTP_FROM_EMAIL || 'noreply@example.com'
-        }>`,
+        from: `"${this.configService.get<string>(
+          'SMTP_FROM_NAME',
+          'Multi-Vendor SaaS'
+        )}" <${this.configService.get<string>(
+          'SMTP_FROM_EMAIL',
+          'noreply@example.com'
+        )}>`,
         to: options.to,
         subject: options.subject,
         html: options.html,

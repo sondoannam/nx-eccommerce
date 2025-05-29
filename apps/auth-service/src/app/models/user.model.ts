@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from 'generated/prisma';
+import { UserRole } from 'packages/libs/utils';
 
 /**
  * User model for internal application logic
@@ -32,10 +32,10 @@ export class User {
 
   @ApiProperty({
     description: 'User role in the system',
-    enum: Role,
-    example: Role.USER,
+    enum: UserRole,
+    example: UserRole.USER,
   })
-  role: Role;
+  role: UserRole;
 
   @ApiProperty({
     description: 'User account creation date',
@@ -79,13 +79,12 @@ export class UserResponse {
     type: [String],
   })
   following: string[];
-
   @ApiProperty({
     description: 'User role in the system',
-    enum: Role,
-    example: Role.USER,
+    enum: UserRole,
+    example: UserRole.USER,
   })
-  role: Role;
+  role: UserRole;
 
   @ApiProperty({
     description: 'URL to user avatar image',

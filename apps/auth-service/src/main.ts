@@ -4,6 +4,7 @@
 
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app/app.module';
 import cookieParser from 'cookie-parser';
 import { AllExceptionsFilter } from 'packages/error-handler';
@@ -13,7 +14,7 @@ import {
 } from 'packages/swagger-config';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'log', 'debug'],
   });
 
@@ -27,6 +28,9 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
+
+  app.useBodyParser('json', { limit: '1mb' }); // Increase JSON payload size
+  app.useBodyParser('urlencoded', { extended: true, limit: '1mb' }); // Increase URL-encoded payload size
 
   // Set up global validation pipe
   app.useGlobalPipes(

@@ -1,5 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
 import { QUEUE_NAMES, JOB_TYPES } from 'packages/libs/bullmq-config';
 import * as nodemailer from 'nodemailer';
@@ -27,7 +28,8 @@ export class OtpEmailProcessor extends WorkerHost {
 
   constructor(
     private readonly emailTemplateService: EmailTemplateService,
-    private readonly otpService: OtpService
+    private readonly otpService: OtpService,
+    private readonly configService: ConfigService
   ) {
     super();
     this.initializeTransporter();
@@ -37,12 +39,12 @@ export class OtpEmailProcessor extends WorkerHost {
    */
   private initializeTransporter() {
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'localhost',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+      host: this.configService.get<string>('SMTP_HOST', 'localhost'),
+      port: this.configService.get<number>('SMTP_PORT', 587),
+      secure: this.configService.get<string>('SMTP_SECURE') === 'true', // true for 465, false for other ports
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
+        user: this.configService.get<string>('SMTP_USER'),
+        pass: this.configService.get<string>('SMTP_PASSWORD'),
       },
       pool: true, // Use connection pooling
       maxConnections: 5,
@@ -57,13 +59,13 @@ export class OtpEmailProcessor extends WorkerHost {
 
     try {
       switch (job.name) {
-        case JOB_TYPES.EMAIL_OTP.SEND_VERIFICATION_OTP:
+        case JOB_TYPES.EMAIL_OTP.SEND_OTP:
           return await this.sendVerificationOtpEmail(job.data);
 
-        case JOB_TYPES.EMAIL_OTP.SEND_PASSWORD_RESET_OTP:
+        case JOB_TYPES.EMAIL_OTP.SEND_PASSWORD_RESET:
           return await this.sendPasswordResetOtpEmail(job.data);
 
-        case JOB_TYPES.EMAIL_OTP.SEND_TWO_FACTOR_OTP:
+        case JOB_TYPES.EMAIL_OTP.SEND_TWO_FACTOR:
           return await this.sendTwoFactorOtpEmail(job.data);
 
         default:
@@ -165,9 +167,13 @@ export class OtpEmailProcessor extends WorkerHost {
   }): Promise<void> {
     try {
       const mailOptions = {
-        from: `"${process.env.SMTP_FROM_NAME || 'Multi-Vendor SaaS'}" <${
-          process.env.SMTP_FROM_EMAIL || 'noreply@example.com'
-        }>`,
+        from: `"${this.configService.get<string>(
+          'SMTP_FROM_NAME',
+          'Multi-Vendor SaaS'
+        )}" <${this.configService.get<string>(
+          'SMTP_FROM_EMAIL',
+          'noreply@example.com'
+        )}>`,
         to: options.to,
         subject: options.subject,
         html: options.html,

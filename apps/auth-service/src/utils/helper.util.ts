@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { Role } from 'generated/prisma';
+import { UserRole } from 'packages/libs/utils';
 import { ValidationError } from 'packages/error-handler';
 import { sign } from 'jsonwebtoken';
 import { CreateUserDto } from '../app/dtos';
@@ -15,7 +15,7 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
  */
 export const validateRegistrationData = (
   data: CreateUserDto,
-  userType: Role
+  userType: UserRole
 ) => {
   const { email, password, name } = data;
 
@@ -44,7 +44,7 @@ export const validateRegistrationData = (
 export const generateToken = (
   userId: string,
   email: string,
-  role: Role
+  role: UserRole
 ): string => {
   const payload = {
     sub: userId,

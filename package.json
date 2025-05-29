@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "pnpx nx run-many --target=serve --all",
     "health:check": "powershell -ExecutionPolicy Bypass -File ./health-monitor.ps1",
-    "health:test": "node ./apps/api-gateway/src/app/health/health-check-test.js"
+    "health:test": "node ./apps/api-gateway/src/app/health/health-check-test.js",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate:dev": "npx prisma migrate dev"
   },
   "private": true,
   "dependencies": {
@@ -14,8 +16,10 @@
     "@nestjs/axios": "^4.0.0",
     "@nestjs/bullmq": "^11.0.2",
     "@nestjs/common": "^10.0.2",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^10.0.2",
     "@nestjs/jwt": "^11.0.0",
+    "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^10.0.2",
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/terminus": "^11.0.0",
@@ -33,6 +37,9 @@
     "http-proxy-middleware": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.3",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "swagger-ui-express": "^5.0.1"
