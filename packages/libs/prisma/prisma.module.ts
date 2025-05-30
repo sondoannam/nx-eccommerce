@@ -1,4 +1,4 @@
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, DynamicModule } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
 /**
@@ -9,4 +9,18 @@ import { PrismaService } from './prisma.service';
   providers: [PrismaService],
   exports: [PrismaService],
 })
-export class PrismaModule {}
+export class PrismaModule {
+  /**
+   * Creates a custom Prisma module with specific service providers
+   * @param serviceProviders - Array of specific Prisma service providers
+   * @returns A dynamic module that provides the specified Prisma services
+   */
+  static forRoot(serviceProviders: any[] = []): DynamicModule {
+    return {
+      module: PrismaModule,
+      providers: [...serviceProviders],
+      exports: [...serviceProviders],
+      global: true,
+    };
+  }
+}

@@ -9,7 +9,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { OtpStatus, OtpType } from '@prisma/client';
-import { PrismaService } from 'packages/libs/prisma';
+import { PrismaBaseService } from 'packages/prisma/prisma-client-base';
 import {
   CreateOtpVerificationDto,
   OtpVerificationResponseDto,

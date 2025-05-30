@@ -1,0 +1,111 @@
+// This is your Product Prisma schema file
+// It demonstrates how to use multiple schemas in your microservices architecture
+
+generator client {
+    provider      = "prisma-client-js"
+    output        = "../../node_modules/.prisma/product-client"
+    binaryTargets = ["native"]
+}
+
+datasource db {
+    provider = "mongodb"
+    url      = env("PRODUCT_DATABASE_URL")
+}
+
+enum ProductStatus {
+    DRAFT
+    ACTIVE
+    OUT_OF_STOCK
+    DISCONTINUED
+}
+
+enum ProductType {
+    PHYSICAL
+    DIGITAL
+    SERVICE
+    SUBSCRIPTION
+}
+
+model Product {
+    id          String        @id @default(auto()) @map("_id") @db.ObjectId
+    name        String
+    description String?
+    price       Float
+    sku         String?       @unique
+    status      ProductStatus @default(DRAFT)
+    type        ProductType   @default(PHYSICAL)
+    stock       Int           @default(0)
+    sellerId    String        @db.ObjectId
+    categoryIds String[]      @db.ObjectId
+    images      Json[]
+    attributes  Json?
+    isDeleted   Boolean       @default(false)
+    deletedAt   DateTime?
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+
+    variants ProductVariant[]
+    reviews  ProductReview[]
+
+    @@index([sellerId])
+    @@index([categoryIds])
+    @@index([status])
+    @@map("products")
+}
+
+model ProductVariant {
+    id         String    @id @default(auto()) @map("_id") @db.ObjectId
+    productId  String    @db.ObjectId
+    name       String
+    sku        String?   @unique
+    price      Float
+    stock      Int       @default(0)
+    attributes Json
+    images     Json[]
+    isDeleted  Boolean   @default(false)
+    deletedAt  DateTime?
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+
+    product Product @relation(fields: [productId], references: [id])
+
+    @@index([productId])
+    @@map("product_variants")
+}
+
+model ProductReview {
+    id        String    @id @default(auto()) @map("_id") @db.ObjectId
+    productId String    @db.ObjectId
+    userId    String    @db.ObjectId
+    rating    Float
+    comment   String?
+    images    Json[]
+    isDeleted Boolean   @default(false)
+    deletedAt DateTime?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    product Product @relation(fields: [productId], references: [id])
+
+    @@index([productId])
+    @@index([userId])
+    @@map("product_reviews")
+}
+
+model Category {
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
+    name        String
+    description String?
+    slug        String    @unique
+    parentId    String?   @db.ObjectId
+    level       Int       @default(1)
+    isActive    Boolean   @default(true)
+    isDeleted   Boolean   @default(false)
+    deletedAt   DateTime?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([parentId])
+    @@index([level])
+    @@map("categories")
+}

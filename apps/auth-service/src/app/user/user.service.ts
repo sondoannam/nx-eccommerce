@@ -1,15 +1,15 @@
 import { ConflictError, NotFoundError } from 'packages/error-handler';
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from '../dtos/create-user.dto';
-import { PrismaService } from 'packages/libs/prisma';
+import { PrismaBaseService } from 'packages/prisma/prisma-client-base';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 
 @Injectable()
-export class UsersService {
-  private readonly logger = new Logger(UsersService.name);
+export class UserService {
+  private readonly logger = new Logger(UserService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaBaseService) {}
 
   /**
    * Create a new user

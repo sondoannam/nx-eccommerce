@@ -2,7 +2,15 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
-export class PaginationRequestDto {
+export class PaginationRequestDto<T> {
+  @ApiPropertyOptional({
+    description: 'Filters to apply on the data',
+    type: 'object',
+  })
+  @IsOptional()
+  @Type(() => Object)
+  filters?: Record<keyof T, any>;
+
   @ApiPropertyOptional({ description: 'Sort by field', example: 'name' })
   @IsOptional()
   @IsString()

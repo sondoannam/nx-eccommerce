@@ -6,8 +6,8 @@
     "dev": "pnpx nx run-many --target=serve --all",
     "health:check": "powershell -ExecutionPolicy Bypass -File ./health-monitor.ps1",
     "health:test": "node ./apps/api-gateway/src/app/health/health-check-test.js",
-    "prisma:generate": "npx prisma generate",
-    "prisma:migrate:dev": "npx prisma migrate dev"
+    "db:gen": "pnpx prisma generate",
+    "db:migrate:dev": "pnpx prisma migrate dev"
   },
   "private": true,
   "dependencies": {

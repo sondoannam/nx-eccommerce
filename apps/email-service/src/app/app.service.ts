@@ -9,7 +9,6 @@ import {
 import {
   SendOtpDto,
   OtpResponseDto,
-  OtpType,
   VerifyOtpDto,
 } from './dtos/otp.dto';
 import { VerifyOtpResultDto } from './dtos/otp-verification.dto';
@@ -56,7 +55,7 @@ export class AppService {
     const otpCode = this.otpService.generateOtpCode();
 
     const job = await this.otpEmailQueue.add(
-      JOB_TYPES.EMAIL_OTP.SEND_VERIFICATION_OTP,
+      JOB_TYPES.EMAIL_OTP.SEND_OTP,
       {
         email: data.email,
         name: data.name,
@@ -91,7 +90,7 @@ export class AppService {
     const otpCode = this.otpService.generateOtpCode();
 
     const job = await this.otpEmailQueue.add(
-      JOB_TYPES.EMAIL_OTP.SEND_PASSWORD_RESET_OTP,
+      JOB_TYPES.EMAIL_OTP.SEND_PASSWORD_RESET,
       {
         email: data.email,
         name: data.name,
@@ -126,7 +125,7 @@ export class AppService {
     const otpCode = this.otpService.generateOtpCode();
 
     const job = await this.otpEmailQueue.add(
-      JOB_TYPES.EMAIL_OTP.SEND_TWO_FACTOR_OTP,
+      JOB_TYPES.EMAIL_OTP.SEND_TWO_FACTOR,
       {
         email: data.email,
         name: data.name,
@@ -161,7 +160,7 @@ export class AppService {
     userType: string;
   }): Promise<{ jobId: string }> {
     const job = await this.notificationQueue.add(
-      JOB_TYPES.EMAIL_NOTIFICATION.SEND_WELCOME,
+      JOB_TYPES.EMAIL_NOTIFICATION.WELCOME,
       data,
       {
         priority: JOB_PRIORITY.NORMAL,

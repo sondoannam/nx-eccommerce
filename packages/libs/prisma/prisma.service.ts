@@ -1,36 +1,18 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaClient } from '@prisma/client';
+import { AbstractPrismaService } from './abstract-prisma.service';
 
 /**
- * Prisma service for database interactions
- * Extends PrismaClient with additional features for NestJS
+ * Default Prisma service for database interactions
+ * Uses the root schema.prisma file
  */
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit {
-  private readonly logger = new Logger(PrismaService.name);
+export class PrismaService extends AbstractPrismaService {
   /**
-   * Constructor that creates a new PrismaClient instance
-   * Can be configured with connection options if needed
+   * Constructor that creates a default PrismaClient instance
+   * Uses the root schema.prisma file
    */
-  constructor(private readonly configService: ConfigService) {
-    super({
-      log: ['error', 'warn'],
-      datasources: {
-        db: {
-          url: configService.get<string>('DATABASE_URL'),
-        },
-      },
-    });
-  }
-
-  /**
-   * Hook called when the module is initialized
-   * Connects to the database
-   */
-  async onModuleInit() {
-    this.logger.log('Connecting to database...');
-    await this.$connect();
-    this.logger.log('Database connection established');
+  constructor(configService: ConfigService) {
+    super(configService, 'prisma/schema.prisma', 'DATABASE_URL');
   }
 }
