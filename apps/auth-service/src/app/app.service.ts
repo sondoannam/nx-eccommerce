@@ -46,7 +46,7 @@ export class AppService {
     });
 
     // Generate tokens
-    const accessToken = generateToken(newUser.id, newUser.email, newUser.role);
+    const accessToken = generateToken(newUser.id, newUser.email, newUser.role as any);
     const refreshToken = generateRefreshToken();
 
     // Calculate expiration (1 day from now)

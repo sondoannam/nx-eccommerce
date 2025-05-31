@@ -25,10 +25,6 @@ export class AppService {
     private readonly otpService: OtpService
   ) {}
 
-  getData(): { message: string } {
-    return { message: 'Email Service is running!' };
-  }
-
   /**
    * Get queue statistics
    */

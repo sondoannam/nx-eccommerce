@@ -6,6 +6,7 @@ export class PaginationRequestDto<T> {
   @ApiPropertyOptional({
     description: 'Filters to apply on the data',
     type: 'object',
+    additionalProperties: true,
   })
   @IsOptional()
   @Type(() => Object)

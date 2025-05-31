@@ -9,12 +9,6 @@ import { VerifyOtpResultDto } from './dtos/otp-verification.dto';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  @ApiOperation({ summary: 'Health check for email service' })
-  getData() {
-    return this.appService.getData();
-  }
-
   @Get('stats')
   @ApiOperation({ summary: 'Get email queue statistics' })
   @ApiResponse({

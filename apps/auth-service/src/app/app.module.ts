@@ -2,7 +2,6 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { HealthModule } from './health/health.module';
 import { ErrorLoggerMiddleware } from 'packages/error-handler';
 import { PrismaBaseModule } from 'packages/prisma/prisma-client-base';
 import { AuthModule } from './auth/auth.module';
@@ -15,8 +14,6 @@ import { AuthModule } from './auth/auth.module';
     }),
     // Database
     PrismaBaseModule,
-    // Feature modules
-    HealthModule,
     AuthModule,
   ],
   controllers: [AppController],

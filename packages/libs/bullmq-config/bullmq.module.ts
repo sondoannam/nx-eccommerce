@@ -1,4 +1,4 @@
-import { Module, DynamicModule } from '@nestjs/common';
+import { Module, DynamicModule, Injectable } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule } from '@nestjs/config';
 import { BullmqConfigService } from './bullmq.config';
@@ -7,6 +7,7 @@ import { BullmqConfigService } from './bullmq.config';
  * Shared BullMQ module that can be imported by microservices
  * This provides a consistent configuration across all services
  */
+@Injectable()
 @Module({
   imports: [ConfigModule],
   providers: [BullmqConfigService],
@@ -24,24 +25,29 @@ export class SharedBullMQModule {
       imports: [
         BullModule.forRootAsync({
           imports: [ConfigModule],
-          inject: [BullmqConfigService],
-          useFactory: (configService: BullmqConfigService) => ({
+          useFactory: async (configService: BullmqConfigService) => ({
             connection: configService.getRedisConfig(),
           }),
+          inject: [BullmqConfigService],
         }),
-        ...queueNames.map(name => 
+        ...queueNames.map((name) =>
           BullModule.registerQueueAsync({
-            imports: [ConfigModule],
             name,
-            inject: [BullmqConfigService],
-            useFactory: (configService: BullmqConfigService) => ({
+            imports: [ConfigModule],
+            useFactory: async (configService: BullmqConfigService) => ({
               connection: configService.getRedisConfig(),
               ...configService.getDefaultQueueOptions(),
             }),
+            inject: [BullmqConfigService],
           })
         ),
       ],
-      exports: [BullModule],
+      providers: [
+        // Make sure BullmqConfigService is provided in this dynamic module
+        // This avoids the circular dependency
+        BullmqConfigService,
+      ],
+      exports: [BullModule, BullmqConfigService],
     };
   }
 
@@ -54,13 +60,17 @@ export class SharedBullMQModule {
       imports: [
         BullModule.forRootAsync({
           imports: [ConfigModule],
-          inject: [BullmqConfigService],
-          useFactory: (configService: BullmqConfigService) => ({
+          useFactory: async (configService: BullmqConfigService) => ({
             connection: configService.getRedisConfig(),
           }),
+          inject: [BullmqConfigService],
         }),
       ],
-      exports: [BullModule],
+      providers: [
+        // Make sure BullmqConfigService is provided in this dynamic module
+        BullmqConfigService,
+      ],
+      exports: [BullModule, BullmqConfigService],
     };
   }
 }

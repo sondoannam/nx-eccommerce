@@ -23,7 +23,7 @@ export class OtpVerificationService {
   private readonly logger = new Logger(OtpVerificationService.name);
   private readonly defaultExpiryMinutes = 5;
   private readonly maxAttempts = 3;
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaBaseService) {}
   /**
    * Create a new OTP verification record in the database
    */
