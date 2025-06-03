@@ -5,8 +5,8 @@
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
@@ -14,7 +14,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@multi-vendor/shared": ["libs/src/index.ts"],
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

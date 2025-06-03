@@ -5,19 +5,17 @@ import {
   QUEUE_NAMES,
   JOB_TYPES,
   JOB_PRIORITY,
-} from 'packages/libs/bullmq-config';
+  PrismaBaseService,
+} from '@multi-vendor/shared';
 import {
   SendOtpDto,
   OtpResponseDto,
   OtpType,
   Language,
-} from '../dtos';
-import { PrismaService } from 'packages/libs/prisma';
-import { OtpVerificationService } from './otp-verification.service';
-import {
   VerifyOtpVerificationDto,
   VerifyOtpResultDto,
 } from '../dtos';
+import { OtpVerificationService } from './otp-verification.service';
 
 @Injectable()
 export class OtpService {
@@ -25,7 +23,7 @@ export class OtpService {
   private readonly OTP_EXPIRY_MINUTES = 5;
   constructor(
     @InjectQueue(QUEUE_NAMES.EMAIL_OTP) private readonly otpQueue: Queue,
-    private readonly prisma: PrismaService,
+    private readonly prisma: PrismaBaseService,
     private readonly otpVerificationService: OtpVerificationService
   ) {}
   /**

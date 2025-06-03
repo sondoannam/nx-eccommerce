@@ -9,7 +9,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { OtpStatus, OtpType } from '@prisma/client';
-import { PrismaService } from 'packages/libs/prisma';
+import { PrismaBaseService } from '@multi-vendor/shared';
 import {
   CreateOtpVerificationDto,
   OtpVerificationResponseDto,
@@ -23,7 +23,7 @@ export class OtpVerificationService {
   private readonly logger = new Logger(OtpVerificationService.name);
   private readonly defaultExpiryMinutes = 5;
   private readonly maxAttempts = 3;
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaBaseService) {}
   /**
    * Create a new OTP verification record in the database
    */

@@ -30,6 +30,7 @@ export function createPaginationDto<T>(ItemType: Type<T>) {
         pageSize: { type: 'number' },
         totalPages: { type: 'number' },
       },
+      additionalProperties: false,
       example: { total: 0, page: 1, pageSize: 10, totalPages: 0 },
     })
     declare meta: PaginationMetaResponse;

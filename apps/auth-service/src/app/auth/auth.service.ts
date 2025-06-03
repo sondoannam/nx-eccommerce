@@ -1,6 +1,6 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from './users.service';
+import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from '@prisma/client';
@@ -10,7 +10,7 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
-    private readonly usersService: UsersService,
+    private readonly userService: UserService,
     private readonly jwtService: JwtService
   ) {}
 
@@ -21,7 +21,7 @@ export class AuthService {
     this.logger.log(`Registering new user with email: ${createUserDto.email}`);
 
     // Create the user
-    const user = await this.usersService.create(createUserDto);
+    const user = await this.userService.create(createUserDto);
 
     // Generate JWT tokens
     const tokens = this.generateTokens(user);
@@ -39,7 +39,7 @@ export class AuthService {
     this.logger.log(`Login attempt for: ${loginDto.email}`);
 
     // Validate will be called by the guard, but we can use it directly
-    const user = await this.usersService.validateUser(
+    const user = await this.userService.validateUser(
       loginDto.email,
       loginDto.password
     );

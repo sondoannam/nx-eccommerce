@@ -2,7 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
-import { QUEUE_NAMES, JOB_TYPES } from 'packages/libs/bullmq-config';
+import { QUEUE_NAMES, JOB_TYPES } from '@multi-vendor/shared';
 import * as nodemailer from 'nodemailer';
 import { EmailTemplateService } from '../services/email-template.service';
 import { OtpService } from '../services/otp.service';

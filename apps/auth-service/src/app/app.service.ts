@@ -1,6 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { hash } from 'bcrypt';
-import { PrismaService } from './prisma/prisma.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { AuthResponseDto } from './dtos/auth-response.dto';
 import {
@@ -8,14 +7,11 @@ import {
   generateToken,
   validateRegistrationData,
 } from '../utils/helper.util';
+import { PrismaBaseService } from 'packages/prisma/prisma-client-base';
 
 @Injectable()
 export class AppService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  getData(): { message: string } {
-    return { message: 'Hello API Test' };
-  }
+  constructor(private readonly prisma: PrismaBaseService) {}
 
   /**
    * Register a new user
@@ -50,7 +46,7 @@ export class AppService {
     });
 
     // Generate tokens
-    const accessToken = generateToken(newUser.id, newUser.email, newUser.role);
+    const accessToken = generateToken(newUser.id, newUser.email, newUser.role as any);
     const refreshToken = generateRefreshToken();
 
     // Calculate expiration (1 day from now)

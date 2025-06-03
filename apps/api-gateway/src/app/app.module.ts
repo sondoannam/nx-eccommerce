@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerBehindProxyGuard } from './guards/throttler.guard';
 import { ProxyModule } from './proxy/proxy.module';
-import { HealthModule } from './health/health.module';
 import { ErrorLoggerMiddleware } from 'packages/error-handler';
 
 @Module({
@@ -17,7 +16,6 @@ import { ErrorLoggerMiddleware } from 'packages/error-handler';
       },
     ]),
     ProxyModule,
-    HealthModule,
   ],
   controllers: [AppController],
   providers: [

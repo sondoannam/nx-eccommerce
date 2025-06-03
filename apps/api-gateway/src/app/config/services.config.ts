@@ -7,6 +7,11 @@ export const servicesConfig = [
     targetUrl: process.env.AUTH_SERVICE_URL || 'http://localhost:8001',
     description: 'Authentication Service',
   },
+  {
+    path: 'email-service',
+    targetUrl: process.env.EMAIL_SERVICE_URL || 'http://localhost:8002',
+    description: 'Email Service',
+  },
   // Uncomment and customize these as you add more services
   // {
   //   path: 'user-service',

@@ -1,23 +1,15 @@
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { createBullBoard } from '@bull-board/api';
 import { ExpressAdapter } from '@bull-board/express';
-import { Queue } from 'bullmq';
+import { Queue, QueueOptions } from 'bullmq';
 
-export * from './bullmq.module';
-export * from './bullmq.config';
-
-/**
- * Queue names used across the application
- */
 export const QUEUE_NAMES = {
-  EMAIL_OTP: 'email:otp',
-  EMAIL_NOTIFICATION: 'email:notification',
-  NOTIFICATION: 'notification',
-};
+  EMAIL_OTP: 'email-otp',
+  EMAIL_NOTIFICATION: 'email-notification',
+} as const;
 
-/**
- * Job types for different queues
- */
+export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
+
 export const JOB_TYPES = {
   EMAIL_OTP: {
     SEND_OTP: 'send-otp',
@@ -25,11 +17,41 @@ export const JOB_TYPES = {
     SEND_TWO_FACTOR: 'send-two-factor',
   },
   EMAIL_NOTIFICATION: {
-    WELCOME: 'welcome-email',
-    ACCOUNT_CREATED: 'account-created',
+    WELCOME: 'welcome',
     ORDER_CONFIRMATION: 'order-confirmation',
   },
+} as const;
+
+export type JobType = {
+  [K in keyof typeof JOB_TYPES]: (typeof JOB_TYPES)[K][keyof (typeof JOB_TYPES)[K]];
+}[keyof typeof JOB_TYPES];
+
+export interface JobData {
+  email: string;
+  name: string;
+  [key: string]: any;
+}
+
+export interface OtpEmailJobData extends JobData {
+  otpCode: string;
+  otpType: 'EMAIL_VERIFICATION' | 'PASSWORD_RESET' | 'TWO_FACTOR_AUTH';
+  language?: 'en' | 'vi';
+  userId?: string;
+  expiresInMinutes?: number;
+}
+
+export interface NotificationEmailJobData extends JobData {
+  userType: string;
+  metadata?: Record<string, any>;
+}
+
+export type QueueJobData = {
+  [QUEUE_NAMES.EMAIL_OTP]: OtpEmailJobData;
+  [QUEUE_NAMES.EMAIL_NOTIFICATION]: NotificationEmailJobData;
 };
+
+export { SharedBullMQModule } from './bullmq.module';
+export { BullmqConfigService } from './bullmq.config';
 
 /**
  * Priority levels for jobs

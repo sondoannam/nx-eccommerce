@@ -1,17 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import {
-  QUEUE_NAMES,
-  JOB_TYPES,
-  JOB_PRIORITY,
-} from 'packages/libs/bullmq-config';
-import {
-  SendOtpDto,
-  OtpResponseDto,
-  OtpType,
-  VerifyOtpDto,
-} from './dtos/otp.dto';
+import { QUEUE_NAMES, JOB_TYPES, JOB_PRIORITY } from '@multi-vendor/shared';
+import { SendOtpDto, OtpResponseDto, VerifyOtpDto } from './dtos/otp.dto';
 import { VerifyOtpResultDto } from './dtos/otp-verification.dto';
 import { OtpService } from './services/otp.service';
 
@@ -25,10 +16,6 @@ export class AppService {
     private readonly notificationQueue: Queue,
     private readonly otpService: OtpService
   ) {}
-
-  getData(): { message: string } {
-    return { message: 'Email Service is running!' };
-  }
 
   /**
    * Get queue statistics
@@ -56,7 +43,7 @@ export class AppService {
     const otpCode = this.otpService.generateOtpCode();
 
     const job = await this.otpEmailQueue.add(
-      JOB_TYPES.EMAIL_OTP.SEND_VERIFICATION_OTP,
+      JOB_TYPES.EMAIL_OTP.SEND_OTP,
       {
         email: data.email,
         name: data.name,
@@ -91,7 +78,7 @@ export class AppService {
     const otpCode = this.otpService.generateOtpCode();
 
     const job = await this.otpEmailQueue.add(
-      JOB_TYPES.EMAIL_OTP.SEND_PASSWORD_RESET_OTP,
+      JOB_TYPES.EMAIL_OTP.SEND_PASSWORD_RESET,
       {
         email: data.email,
         name: data.name,
@@ -126,7 +113,7 @@ export class AppService {
     const otpCode = this.otpService.generateOtpCode();
 
     const job = await this.otpEmailQueue.add(
-      JOB_TYPES.EMAIL_OTP.SEND_TWO_FACTOR_OTP,
+      JOB_TYPES.EMAIL_OTP.SEND_TWO_FACTOR,
       {
         email: data.email,
         name: data.name,
@@ -161,7 +148,7 @@ export class AppService {
     userType: string;
   }): Promise<{ jobId: string }> {
     const job = await this.notificationQueue.add(
-      JOB_TYPES.EMAIL_NOTIFICATION.SEND_WELCOME,
+      JOB_TYPES.EMAIL_NOTIFICATION.WELCOME,
       data,
       {
         priority: JOB_PRIORITY.NORMAL,

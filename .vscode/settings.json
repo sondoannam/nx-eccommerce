@@ -1,4 +1,5 @@
 {
   "nxConsole.generateAiAgentRules": true,
-  "conventionalCommits.scopes": ["app/auth"]
+  "conventionalCommits.scopes": ["app/auth", "app", "app/email"],
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }
