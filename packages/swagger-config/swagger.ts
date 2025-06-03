@@ -31,7 +31,7 @@ export function setupSwagger(
     .build();
 
   // Add tags if provided
-  tags.forEach((tag) => config.tags.push({ name: tag }));
+  tags.forEach((tag) => config.tags?.push({ name: tag }));
 
   // Create the Swagger document
   const document = SwaggerModule.createDocument(app, config);

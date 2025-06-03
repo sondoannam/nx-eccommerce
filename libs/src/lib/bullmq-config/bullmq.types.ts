@@ -1,8 +1,4 @@
-import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
-import { createBullBoard } from '@bull-board/api';
-import { ExpressAdapter } from '@bull-board/express';
-import { Queue, QueueOptions } from 'bullmq';
-
+// Queue names constants
 export const QUEUE_NAMES = {
   EMAIL_OTP: 'email-otp',
   EMAIL_NOTIFICATION: 'email-notification',
@@ -10,6 +6,7 @@ export const QUEUE_NAMES = {
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
 
+// Job types for each queue
 export const JOB_TYPES = {
   EMAIL_OTP: {
     SEND_OTP: 'send-otp',
@@ -26,10 +23,11 @@ export type JobType = {
   [K in keyof typeof JOB_TYPES]: (typeof JOB_TYPES)[K][keyof (typeof JOB_TYPES)[K]];
 }[keyof typeof JOB_TYPES];
 
+// Job data types
 export interface JobData {
   email: string;
   name: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface OtpEmailJobData extends JobData {
@@ -42,7 +40,7 @@ export interface OtpEmailJobData extends JobData {
 
 export interface NotificationEmailJobData extends JobData {
   userType: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export type QueueJobData = {
@@ -50,12 +48,7 @@ export type QueueJobData = {
   [QUEUE_NAMES.EMAIL_NOTIFICATION]: NotificationEmailJobData;
 };
 
-export { SharedBullMQModule } from './bullmq.module';
-export { BullmqConfigService } from './bullmq.config';
-
-/**
- * Priority levels for jobs
- */
+// Job priority levels
 export const JOB_PRIORITY = {
   CRITICAL: 1,
   HIGH: 2,
@@ -63,22 +56,3 @@ export const JOB_PRIORITY = {
   LOW: 4,
   BULK: 5,
 };
-
-/**
- * Create a Bull Board for queue monitoring
- * @param queues Array of BullMQ queues to monitor
- * @returns Express middleware for Bull Board
- */
-export function createBullBoardMiddleware(queues: Queue[] = []) {
-  const serverAdapter = new ExpressAdapter();
-  serverAdapter.setBasePath('/admin/queues');
-
-  const bullBoardQueues = queues.map((queue) => new BullMQAdapter(queue));
-
-  createBullBoard({
-    queues: bullBoardQueues,
-    serverAdapter,
-  });
-
-  return serverAdapter.getRouter();
-}
