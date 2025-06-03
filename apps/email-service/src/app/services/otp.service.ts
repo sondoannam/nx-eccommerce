@@ -5,7 +5,8 @@ import {
   QUEUE_NAMES,
   JOB_TYPES,
   JOB_PRIORITY,
-} from 'packages/libs/bullmq-config';
+  PrismaBaseService,
+} from '@multi-vendor/shared';
 import {
   SendOtpDto,
   OtpResponseDto,
@@ -14,7 +15,6 @@ import {
   VerifyOtpVerificationDto,
   VerifyOtpResultDto,
 } from '../dtos';
-import { PrismaBaseService } from 'packages/prisma/prisma-client-base';
 import { OtpVerificationService } from './otp-verification.service';
 
 @Injectable()

@@ -2,8 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { SharedBullMQModule, QUEUE_NAMES } from 'packages/libs/bullmq-config';
-import { PrismaModule } from 'packages/libs/prisma';
+import {
+  BullmqConfigModule as SharedBullMQModule,
+  QUEUE_NAMES,
+  PrismaBaseModule,
+} from '@multi-vendor/shared';
 import { NotificationEmailProcessor } from './processors/notification-email.processor';
 import { EmailTemplateService } from './services/email-template.service';
 import { OtpService } from './services/otp.service';
@@ -15,7 +18,7 @@ import { OtpVerificationService } from './services/otp-verification.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    PrismaModule,
+    PrismaBaseModule,
     SharedBullMQModule.forQueues([
       QUEUE_NAMES.EMAIL_OTP,
       QUEUE_NAMES.EMAIL_NOTIFICATION,

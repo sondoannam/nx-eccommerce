@@ -8,13 +8,14 @@ import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app/app.module';
 import cookieParser from 'cookie-parser';
-import { AllExceptionsFilter } from 'packages/error-handler';
 import {
+  AllExceptionsFilter,
   setupSwagger,
   createServiceSwaggerOptions,
-} from 'packages/swagger-config';
+  BullmqConfigService,
+  QUEUE_NAMES,
+} from '@multi-vendor/shared';
 import { Queue } from 'bullmq';
-import { QUEUE_NAMES, BullmqConfigService } from 'packages/libs/bullmq-config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {

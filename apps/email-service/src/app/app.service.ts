@@ -1,16 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import {
-  QUEUE_NAMES,
-  JOB_TYPES,
-  JOB_PRIORITY,
-} from 'packages/libs/bullmq-config';
-import {
-  SendOtpDto,
-  OtpResponseDto,
-  VerifyOtpDto,
-} from './dtos/otp.dto';
+import { QUEUE_NAMES, JOB_TYPES, JOB_PRIORITY } from '@multi-vendor/shared';
+import { SendOtpDto, OtpResponseDto, VerifyOtpDto } from './dtos/otp.dto';
 import { VerifyOtpResultDto } from './dtos/otp-verification.dto';
 import { OtpService } from './services/otp.service';
 

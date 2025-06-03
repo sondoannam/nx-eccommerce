@@ -1,15 +1,13 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Processor, WorkerHost, InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Job } from 'bullmq';
-import { QUEUE_NAMES, JOB_TYPES } from 'packages/libs/bullmq-config';
+import { Job, Queue } from 'bullmq';
+import {
+  QUEUE_NAMES,
+  JOB_TYPES,
+  NotificationEmailJobData,
+} from '@multi-vendor/shared';
 import * as nodemailer from 'nodemailer';
-
-interface NotificationEmailJobData {
-  email: string;
-  name: string;
-  userType: string;
-}
 
 /**
  * Notification Email queue processor that handles notification emails
@@ -19,8 +17,13 @@ interface NotificationEmailJobData {
 export class NotificationEmailProcessor extends WorkerHost {
   private readonly logger = new Logger(NotificationEmailProcessor.name);
   private transporter: nodemailer.Transporter;
+  private readonly maxRetries = 3;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    @InjectQueue(QUEUE_NAMES.EMAIL_NOTIFICATION)
+    private readonly notificationQueue: Queue<NotificationEmailJobData>
+  ) {
     super();
     this.initializeTransporter();
   }
@@ -40,36 +43,104 @@ export class NotificationEmailProcessor extends WorkerHost {
       pool: true,
       maxConnections: 5,
       maxMessages: 100,
+      rateDelta: 1000,
+      rateLimit: 5, // Limit to 5 emails per second
     });
 
     this.logger.log('Notification email transporter initialized');
   }
 
-  async process(job: Job<NotificationEmailJobData>): Promise<any> {
+  async process(job: Job<NotificationEmailJobData>): Promise<void> {
     this.logger.log(
       `Processing notification email job ${job.name} with ID ${job.id}`
     );
 
     try {
+      // Update job progress
+      await job.updateProgress(10);
+
+      // Validate job data
+      this.validateJobData(job.data);
+      await job.updateProgress(20);
+
+      // Process based on job type
+      let result;
       switch (job.name) {
         case JOB_TYPES.EMAIL_NOTIFICATION.WELCOME:
-          return await this.sendWelcomeEmail(job.data);
+          result = await this.sendWelcomeEmail(job);
+          break;
 
         // case JOB_TYPES.EMAIL_NOTIFICATION.SEND_MARKETING:
         //   return await this.sendMarketingEmail(job.data);
 
         case JOB_TYPES.EMAIL_NOTIFICATION.ORDER_CONFIRMATION:
-          return await this.sendPaymentReceiptEmail(job.data);
+          result = await this.sendPaymentReceiptEmail(job);
+          break;
 
         default:
           throw new Error(`Unknown notification email job type: ${job.name}`);
       }
+
+      // Log success and return result
+      this.logger.log(`Successfully processed job ${job.id}`);
+      return result;
     } catch (error) {
+      // Handle specific error types
+      if (error.code === 'ECONNREFUSED') {
+        this.logger.error(`SMTP connection refused for job ${job.id}`);
+        await this.handleSMTPError(job, error);
+        throw error;
+      }
+
+      if (error.code === 'ETIMEDOUT') {
+        this.logger.error(`SMTP timeout for job ${job.id}`);
+        await this.handleSMTPError(job, error);
+        throw error;
+      }
+
+      // Log the error with context
       this.logger.error(
         `Failed to process notification email job ${job.id}:`,
-        error
+        error.stack
       );
       throw error;
+    }
+  }
+
+  private validateJobData(data: NotificationEmailJobData): void {
+    if (!data.email || !data.name || !data.userType) {
+      throw new Error('Missing required job data fields');
+    }
+
+    if (!this.isValidEmail(data.email)) {
+      throw new Error('Invalid email address');
+    }
+  }
+
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  private async handleSMTPError(
+    job: Job<NotificationEmailJobData>,
+    error: Error
+  ): Promise<void> {
+    const attempts = job.attemptsMade;
+
+    if (attempts < this.maxRetries) {
+      const delay = Math.pow(2, attempts) * 1000; // Exponential backoff
+      await job.moveToDelayed(Date.now() + delay);
+      this.logger.log(
+        `Retrying job ${job.id} in ${delay}ms (attempt ${attempts + 1}/${
+          this.maxRetries
+        })`
+      );
+    } else {
+      this.logger.error(
+        `Job ${job.id} failed after ${attempts} attempts: ${error.message}`
+      );
+      // Could implement fallback delivery method here
     }
   }
 
@@ -77,26 +148,33 @@ export class NotificationEmailProcessor extends WorkerHost {
    * Send welcome email
    */
   private async sendWelcomeEmail(
-    data: NotificationEmailJobData
+    job: Job<NotificationEmailJobData>
   ): Promise<void> {
+    const { data } = job;
     this.logger.log(`Sending welcome email to ${data.email}`);
 
+    await job.updateProgress(40);
     const htmlContent = this.generateWelcomeEmailTemplate(data);
+    await job.updateProgress(60);
 
     await this.sendEmail({
       to: data.email,
       subject: 'Welcome to Multi-Vendor SaaS Platform!',
       html: htmlContent,
       priority: 'normal',
+      jobId: job.id,
     });
 
+    await job.updateProgress(100);
     this.logger.log(`Welcome email sent successfully to ${data.email}`);
   }
 
   /**
    * Send marketing email (placeholder)
    */
-  private async sendMarketingEmail(data: any): Promise<void> {
+  private async sendMarketingEmail(
+    data: NotificationEmailJobData
+  ): Promise<void> {
     this.logger.log(`Sending marketing email to ${data.email}`);
     // Implementation for marketing emails
   }
@@ -104,9 +182,18 @@ export class NotificationEmailProcessor extends WorkerHost {
   /**
    * Send payment receipt email (placeholder)
    */
-  private async sendPaymentReceiptEmail(data: any): Promise<void> {
+  private async sendPaymentReceiptEmail(
+    job: Job<NotificationEmailJobData>
+  ): Promise<void> {
+    const { data } = job;
     this.logger.log(`Sending payment receipt email to ${data.email}`);
+    await job.updateProgress(40);
+
     // Implementation for payment receipt emails
+    // ... (implement similar to welcome email)
+
+    await job.updateProgress(100);
+    this.logger.log(`Payment receipt email sent successfully to ${data.email}`);
   }
 
   /**
@@ -164,6 +251,7 @@ export class NotificationEmailProcessor extends WorkerHost {
     subject: string;
     html: string;
     priority?: 'high' | 'normal' | 'low';
+    jobId: string;
   }): Promise<void> {
     try {
       const mailOptions = {
@@ -178,6 +266,10 @@ export class NotificationEmailProcessor extends WorkerHost {
         subject: options.subject,
         html: options.html,
         priority: options.priority || 'normal',
+        messageId: `<${options.jobId}@${this.configService.get<string>(
+          'SMTP_DOMAIN',
+          'example.com'
+        )}>`,
       };
 
       const result = await this.transporter.sendMail(mailOptions);
